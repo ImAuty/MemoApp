@@ -1,4 +1,4 @@
 # MemoApp
-Memo Application for SmartPhone
+Memo Application for Smart Phone
 
 Test
