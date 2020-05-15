@@ -1,0 +1,8 @@
+MemoApplication/.vs/
+MemoApplication/MemoApplication/MemoApplication.Android/bin/
+MemoApplication/MemoApplication/MemoApplication.Android/obj/
+MemoApplication/MemoApplication/MemoApplication.iOS/obj/
+MemoApplication/MemoApplication/MemoApplication/bin/
+MemoApplication/MemoApplication/MemoApplication/obj/
+MemoApplication/MemoApplication/MemoApplication.iOS/bin/
+*.user
