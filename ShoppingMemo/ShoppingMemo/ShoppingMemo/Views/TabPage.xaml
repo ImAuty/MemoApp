@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="ShoppingMemo.Views.TabPage"
+             Title="{Binding Name}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="autorenew_black.png"
+                     Clicked="RenewToolbarItem_Clicked" />
+        <ToolbarItem IconImageSource="edit_black.png"
+                     Clicked="EditToolbarItem_Clicked" />
+        <ToolbarItem IconImageSource="delete_black.png"
+                     Clicked="DeleteToolbar_Clicked" />
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <StackLayout Padding="10">
+            <ListView ItemsSource="{Binding ItemViewModels}" HasUnevenRows="True">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Frame BackgroundColor="LightCyan" Margin="5" Padding="5">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer NumberOfTapsRequired="1" Tapped="Item_SingleTapped" />
+                                    <TapGestureRecognizer NumberOfTapsRequired="2" Tapped="Item_DoubleTapped" />
+                                </Frame.GestureRecognizers>
+                                <StackLayout>
+                                    <!-- 通常表示 -->
+                                    <Grid IsVisible="{Binding IsDisplayMode}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*" />
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               HorizontalTextAlignment="Start" FontSize="Large" Margin="5, 0"
+                                               Text="{Binding Name}" />
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               HorizontalTextAlignment="End" FontSize="Large" Margin="5, 0"
+                                               Text="{Binding Number}" />
+                                        <StackLayout Grid.Row="0" Grid.Column="2"
+                                                     Orientation="Horizontal" Margin="5, 0">
+                                            <ImageButton Source="arrow_drop_down_black.png" HeightRequest="32"
+                                                         Clicked="DownButton_Clicked" />
+                                            <ImageButton Source="arrow_drop_up_black.png" HeightRequest="32"
+                                                         Clicked="UpButton_Clicked" />
+                                        </StackLayout>
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                               BackgroundColor="White" FontSize="Medium" Padding="5"
+                                               Text="{Binding Description}" IsVisible="{Binding ShowDescription}" />
+                                    </Grid>
+                                    <!-- 編集表示 -->
+                                    <Grid IsVisible="{Binding IsEditMode}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="3*" />
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ImageButton Grid.Row="0" Grid.Column="0"
+                                                     Source="remove_circle_outline_black.png" HeightRequest="32"
+                                                     BackgroundColor="Transparent"
+                                                     Clicked="RemoveButton_Clicked" />
+                                        <Entry Grid.Row="0" Grid.Column="1"
+                                               HorizontalTextAlignment="Start" FontSize="Large"
+                                               Keyboard="Text"
+                                               Text="{Binding Name}" Placeholder="名前" />
+                                        <Entry Grid.Row="0" Grid.Column="2"
+                                               HorizontalTextAlignment="End" FontSize="Large"
+                                               Keyboard="Numeric"
+                                               Text="{Binding Number}" />
+                                        <StackLayout Grid.Row="0" Grid.Column="3"
+                                                     Orientation="Horizontal" Margin="5, 0">
+                                            <ImageButton Source="done_black.png" HeightRequest="32"
+                                                         BackgroundColor="Transparent"
+                                                         Clicked="DoneButton_Clicked" />
+                                            <ImageButton Source="clear_black.png" HeightRequest="32"
+                                                         BackgroundColor="Transparent"
+                                                         Clicked="ClearButton_Clicked" />
+                                        </StackLayout>
+                                        <Editor Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                                                BackgroundColor="White" FontSize="Medium" AutoSize="TextChanges"
+                                                Keyboard="Text"
+                                                Text="{Binding Description}" Placeholder="説明" />
+                                    </Grid>
+                                </StackLayout>
+                            </Frame>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Frame Margin="5" Padding="5">
+                <ImageButton Source="add_black.png" BackgroundColor="White"
+                             Clicked="AddButton_Clicked" />
+            </Frame>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

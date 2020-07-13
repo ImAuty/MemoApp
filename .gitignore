@@ -1,8 +1,8 @@
-MemoApplication/.vs/
-MemoApplication/MemoApplication/MemoApplication.Android/bin/
-MemoApplication/MemoApplication/MemoApplication.Android/obj/
-MemoApplication/MemoApplication/MemoApplication.iOS/obj/
-MemoApplication/MemoApplication/MemoApplication/bin/
-MemoApplication/MemoApplication/MemoApplication/obj/
-MemoApplication/MemoApplication/MemoApplication.iOS/bin/
+ShoppingMemo/.vs/
+ShoppingMemo/ShoppingMemo/ShoppingMemo.Android/bin/
+ShoppingMemo/ShoppingMemo/ShoppingMemo.Android/obj/
+ShoppingMemo/ShoppingMemo/ShoppingMemo.iOS/obj/
+ShoppingMemo/ShoppingMemo/ShoppingMemo/bin/
+ShoppingMemo/ShoppingMemo/ShoppingMemo/obj/
+ShoppingMemo/ShoppingMemo/ShoppingMemo.iOS/bin/
 *.user
