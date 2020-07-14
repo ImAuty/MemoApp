@@ -2,6 +2,7 @@
 using ShoppingMemo.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -61,6 +62,25 @@ namespace ShoppingMemo.Views
             await RenewItems();
         }
 
+        /// <summary>
+        /// ツールバーの共有ボタンが押された時のイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void ShareToolbarItem_Clicked(object sender, System.EventArgs e)
+        {
+            // アイテムの情報を取得する
+            var items = await App.Database.GetItemsAsync(_tabViewModel.Tab.Id);
+            var itemTexts = items.OrderBy(i => i.Order).ThenBy(i => i.Id)
+                .Select(i => i.ToString())
+                .ToArray();
+            var texts = new string[3];
+            texts[0] = "買い物メモ";
+            texts[1] = _tabViewModel.Tab.Name;
+            texts[2] = string.Join("\r\n", itemTexts);
+            // 共有する
+            await Share.RequestAsync(string.Join("\r\n", texts));
+        }
 
         /// <summary>
         /// ツールバーの編集ボタンが押された時のイベント
@@ -85,17 +105,11 @@ namespace ShoppingMemo.Views
         private async void DeleteToolbar_Clicked(object sender, System.EventArgs e)
         {
             // アラートを表示する
-            var result = await DisplayAlert(_tabViewModel.Tab.Name, "アイテムをすべて削除しますか？", "Yes", "No");
+            var result = await DisplayAlert(_tabViewModel.Tab.Name, "タブを削除しますか？", "Yes", "No");
             if (!result) return;
-            // タブのアイテムをすべて削除する
-            foreach (var itemViewModel in _tabViewModel.ItemViewModels)
-            {
-                await App.Database.RemoveItemAsync(itemViewModel.Item);
-            }
+            await App.Database.RemoveTabAsync(_tabViewModel.Tab);
             _tabViewModel.ItemViewModels.Clear();
-            // タブの名前を変更する
-            _tabViewModel.Name = "Tab " + _tabViewModel.Tab.Id.ToString();
-            await App.Database.UpdateTabAsync(_tabViewModel.Tab);
+            // TODO: 画面側のタブを削除する
         }
 
         #endregion
@@ -103,85 +117,84 @@ namespace ShoppingMemo.Views
         #region ItemDisplayer
 
         /// <summary>
-        /// アイテムがシングルタップされた時のイベント
+        /// アイテムがタップされた時のイベント
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Item_SingleTapped(object sender, System.EventArgs e)
+        private void ListView_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             // 対象のアイテムを取得する
-            var layout = (BindableObject)sender;
-            var itemViewModel = (ItemViewModel)layout.BindingContext;
+            var itemViewModel = e.Item as ItemViewModel;
             // 説明ラベルの表示・非表示を切り替える
             itemViewModel.ShowDescription = !itemViewModel.ShowDescription;
         }
 
         /// <summary>
-        /// アイテムの下矢印ボタンが押された時のイベント
+        /// アイテムの編集ボタンが押された時のイベント
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void DownButton_Clicked(object sender, System.EventArgs e)
-        {
-            // 対象のアイテムを取得する
-            var layout = (BindableObject)sender;
-            var srcItem = (ItemViewModel)layout.BindingContext;
-            // アイテムの位置を確認する
-            var index = _tabViewModel.ItemViewModels.IndexOf(srcItem);
-            if (index >= _tabViewModel.ItemViewModels.Count - 1) return;
-            // アイテムの順序を一つ後のアイテムと入れ替える
-            var dstItem = _tabViewModel.ItemViewModels.ElementAt(index + 1);
-            var srcOrder = srcItem.Order;
-            srcItem.Order = dstItem.Order;
-            dstItem.Order = srcOrder;
-            // DBを更新する
-            await App.Database.UpdateItemAsync(srcItem.Item);
-            await App.Database.UpdateItemAsync(dstItem.Item);
-            // 画面を更新する
-            _tabViewModel.ItemViewModels.Insert(index + 2, srcItem);
-            _tabViewModel.ItemViewModels.RemoveAt(index);
-        }
-
-        /// <summary>
-        /// アイテムの上矢印ボタンが押された時のイベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void UpButton_Clicked(object sender, System.EventArgs e)
-        {
-            // 対象のアイテムを取得する
-            var layout = (BindableObject)sender;
-            var srcItem = (ItemViewModel)layout.BindingContext;
-            // アイテムの位置を確認する
-            var index = _tabViewModel.ItemViewModels.IndexOf(srcItem);
-            if (index <= 0) return;
-            // アイテムの順序を一つ後のアイテムと入れ替える
-            var dstItem = _tabViewModel.ItemViewModels.ElementAt(index - 1);
-            var srcOrder = srcItem.Order;
-            srcItem.Order = dstItem.Order;
-            dstItem.Order = srcOrder;
-            // DBを更新する
-            await App.Database.UpdateItemAsync(srcItem.Item);
-            await App.Database.UpdateItemAsync(dstItem.Item);
-            // 画面を更新する
-            _tabViewModel.ItemViewModels.Insert(index - 1, srcItem);
-            _tabViewModel.ItemViewModels.RemoveAt(index + 1);
-        }
-
-        /// <summary>
-        /// アイテムがダブルタップされた時のイベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Item_DoubleTapped(object sender, System.EventArgs e)
+        private void EditButton_Clicked(object sender, System.EventArgs e)
         {
             // 対象のアイテムを取得する
             var layout = (BindableObject)sender;
             var itemViewModel = (ItemViewModel)layout.BindingContext;
             // 表示レイアウト・編集レイアウトを切り替える
             itemViewModel.IsEditMode = !itemViewModel.IsEditMode;
-            // 説明ラベルを表示する
-            itemViewModel.ShowDescription = true;
+        }
+
+        /// <summary>
+        /// アイテムの順序ボタンが押された時のイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OrderButton_Clicked(object sender, System.EventArgs e)
+        {
+            var up = "一つ上に移動する";
+            var down = "一つ下に移動する";
+
+            // 対象のアイテムを取得する
+            var layout = (BindableObject)sender;
+            var srcItem = (ItemViewModel)layout.BindingContext;
+
+            // アイテムの位置を確認する
+            var index = _tabViewModel.ItemViewModels.IndexOf(srcItem);
+            if (index >= _tabViewModel.ItemViewModels.Count - 1) down = null;
+            if (index <= 0) up = null;
+
+            var action = await DisplayActionSheet("アイテムを移動する", "Cancel", null, up, down);
+
+            if (action == down)
+            {
+                if (index >= _tabViewModel.ItemViewModels.Count - 1) return;
+                // アイテムの順序を一つ後のアイテムと入れ替える
+                var dstItem = _tabViewModel.ItemViewModels.ElementAt(index + 1);
+                var srcOrder = srcItem.Order;
+                srcItem.Order = dstItem.Order;
+                dstItem.Order = srcOrder;
+                // DBを更新する
+                await App.Database.UpdateItemAsync(srcItem.Item);
+                await App.Database.UpdateItemAsync(dstItem.Item);
+                // 画面を更新する
+                _tabViewModel.ItemViewModels.Insert(index + 2, srcItem);
+                _tabViewModel.ItemViewModels.RemoveAt(index);
+            }
+
+            if (action == up)
+            {
+                if (index <= 0) return;
+                // アイテムの順序を一つ前のアイテムと入れ替える
+                var dstItem = _tabViewModel.ItemViewModels.ElementAt(index - 1);
+                var srcOrder = srcItem.Order;
+                srcItem.Order = dstItem.Order;
+                dstItem.Order = srcOrder;
+                // DBを更新する
+                await App.Database.UpdateItemAsync(srcItem.Item);
+                await App.Database.UpdateItemAsync(dstItem.Item);
+                // 画面を更新する
+                _tabViewModel.ItemViewModels.Insert(index - 1, srcItem);
+                _tabViewModel.ItemViewModels.RemoveAt(index + 1);
+            }
         }
 
         #endregion
@@ -221,6 +234,11 @@ namespace ShoppingMemo.Views
             await App.Database.UpdateItemAsync(itemViewModel.Item);
             // 表示レイアウト・編集レイアウトを切り替える
             itemViewModel.IsEditMode = !itemViewModel.IsEditMode;
+            // 説明ラベルの表示を確認する
+            if (!string.IsNullOrEmpty(itemViewModel.Item.Description))
+            {
+                itemViewModel.ShowDescription = true;
+            }
         }
 
         /// <summary>
@@ -271,5 +289,22 @@ namespace ShoppingMemo.Views
             await App.Database.SaveItemAsync(item);
         }
 
+        /// <summary>
+        /// 全削除ボタンが押された時のイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void DeleteButton_Clicked(object sender, System.EventArgs e)
+        {
+            // アラートを表示する
+            var result = await DisplayAlert(_tabViewModel.Tab.Name, "アイテムをすべて削除しますか？", "Yes", "No");
+            if (!result) return;
+            // タブのアイテムをすべて削除する
+            foreach (var itemViewModel in _tabViewModel.ItemViewModels)
+            {
+                await App.Database.RemoveItemAsync(itemViewModel.Item);
+            }
+            _tabViewModel.ItemViewModels.Clear();
+        }
     }
 }
