@@ -37,7 +37,7 @@ namespace ShoppingMemo.ViewModels
         private bool _showDescription = false;
         public bool ShowDescription
         {
-            get { return _showDescription; }
+            get { return _showDescription && _isDisplayMode; }
             set { SetProperty(ref _showDescription, value); }
         }
 
